@@ -32,6 +32,12 @@ def decrypt(key,  data):
 def hd(d):
     return " ".join("%02X" % e for e in d)
 
+def checksum_valid(d):
+    if d[4] == 0x0d and (sum(d[:3]) & 0xff) == d[3]:
+        return True
+    else:
+        return False
+
 if __name__ == "__main__":
     # Key retrieved from /dev/random, guaranteed to be random ;)
     key = [0xc4, 0xc6, 0xc0, 0x92, 0x40, 0x23, 0xdc, 0x96]
@@ -46,8 +52,11 @@ if __name__ == "__main__":
 
     while True:
         data = list(ord(e) for e in fp.read(8))
-        decrypted = decrypt(key, data)
-        if decrypted[4] != 0x0d or (sum(decrypted[:3]) & 0xff) != decrypted[3]:
+        if checksum_valid(data):
+            decrypted = data
+        else:
+            decrypted = decrypt(key, data)
+        if not checksum_valid(data):
             print hd(data), " => ", hd(decrypted),  "Checksum error"
         else:
             op = decrypted[0]
@@ -64,4 +73,6 @@ if __name__ == "__main__":
                 print "T: %2.2f" % (values[0x42]/16.0-273.15),
             if 0x44 in values:
                 print "RH: %2.2f" % (values[0x44]/100.0),
+            if 0x41 in values:
+                print "RH: %2.2f" % (values[0x41]/100.0),
             print
