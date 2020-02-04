@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #  from https://hackaday.io/project/5301-reverse-engineering-a-low-cost-usb-co-monitor/log/17909-all-your-base-are-belong-to-us
 
 import sys
@@ -68,13 +68,13 @@ if __name__ == "__main__":
 
     while True:
         PROM_NUM.set(len(values))
-        data = list(ord(e) for e in fp.read(8))
+        data = fp.read(8)
         if checksum_valid(data):
             decrypted = data
         else:
             decrypted = decrypt(key, data)
         if not checksum_valid(data):
-            print hd(data), " => ", hd(decrypted),  "Checksum error"
+            print(hd(data), " => ", hd(decrypted),  "Checksum error")
             PROM_ERRORS.inc()
         else:
             PROM_PARSED.inc()
@@ -84,22 +84,22 @@ if __name__ == "__main__":
             values[op] = val
 
             # Output all data, mark just received value with asterisk
-            print ", ".join( "%s%02X: %04X %5i" % ([" ", "*"][op==k], k, v, v) for (k, v) in sorted(values.items())), "  ",
+            print(", ".join( "%s%02X: %04X %5i" % ([" ", "*"][op==k], k, v, v) for (k, v) in sorted(values.items())), "  ", end=' ')
             ## From http://co2meters.com/Documentation/AppNotes/AN146-RAD-0401-serial-communication.pdf
             if 0x50 in values:
                 t = values[0x50]
                 PROM_CO2.set(t)
-                print "CO2: %4i" % t,
+                print("CO2: %4i" % t, end=' ')
             if 0x42 in values:
                 t = values[0x42]/16.0-273.15
                 PROM_TEMP.set(round(t, 2))
-                print "T: %2.2f" % t,
+                print("T: %2.2f" % t, end=' ')
             if 0x44 in values:
                 t = values[0x44]/100.0
                 PROM_RH.set(round(t, 2))
-                print "RH: %2.2f" % t,
+                print("RH: %2.2f" % t, end=' ')
             if 0x41 in values:
                 t = values[0x41]/100.0
                 PROM_RH.set(round(t, 2))
-                print "RH: %2.2f" % t,
-            print
+                print("RH: %2.2f" % t, end=' ')
+            print()
