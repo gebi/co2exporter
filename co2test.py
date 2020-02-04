@@ -48,6 +48,7 @@ if __name__ == "__main__":
     set_report = "\x00" + "".join(chr(e) for e in key)
     fcntl.ioctl(fp, HIDIOCSFEATURE_9, set_report)
 
+    # global dictionary with all values received from sensor
     values = {}
 
     while True:
