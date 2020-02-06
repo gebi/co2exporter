@@ -66,7 +66,7 @@ if __name__ == "__main__":
     except: pass
     print(f"Listening on {args.addr}:{args.port}, appending labels: {labels}", file=sys.stderr)
 
-    # Create a metric to track time spent and requests made.
+    # metrics
     reg = CollectorRegistry()
     def w(p):
         if len(labels) > 0:
@@ -98,8 +98,8 @@ if __name__ == "__main__":
         else:
             decrypted = decrypt(key, data)
         if not checksum_valid(data):
-            print(hd(data), " => ", hd(decrypted),  "Checksum error", file=sys.stderr)
             PROM_ERRORS.inc()
+            print(hd(data), " => ", hd(decrypted),  "Checksum error", file=sys.stderr)
         else:
             PROM_PARSED.inc()
             op = decrypted[0]
