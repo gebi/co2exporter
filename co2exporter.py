@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-#  from https://hackaday.io/project/5301-reverse-engineering-a-low-cost-usb-co-monitor/log/17909-all-your-base-are-belong-to-us
+#  initial program from https://hackaday.io/project/5301-reverse-engineering-a-low-cost-usb-co-monitor/log/17909-all-your-base-are-belong-to-us
+#  prometheus exporter part and make it fluffy by gebi
+#  (c) (gebi) Michael Gebetsroither <michael@mgeb.org>
 
 import sys
 import fcntl
