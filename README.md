@@ -44,12 +44,14 @@ Listening on :9672, appending labels: {'place': 'cellar', 'room': 'workshop'}
 
 ## Metrics Generated
 
+You can set multiple labels on metrics exported by this exporter, see USAGE
+
 Main metrics:
 
-- co2sensor_co2_ppm
-- co2sensor_temperature_celsius
-- co2sensor_relative_humidity_percent
-- co2sensor_packet_checksum_errors_total (if there are problems decoding sensor data)
+- `co2sensor_co2_ppm`
+- `co2sensor_temperature_celsius`
+- `co2sensor_relative_humidity_percent`
+- `co2sensor_packet_checksum_errors_total` (if there are problems decoding sensor data)
 
 Full metrics output:
 
