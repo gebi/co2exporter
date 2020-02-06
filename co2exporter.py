@@ -62,12 +62,12 @@ if __name__ == "__main__":
 
     # Create a metric to track time spent and requests made.
     reg = CollectorRegistry()
-    PROM_PARSED = Counter('co2sensor_ops_parsed', 'Number of datapoints received', labelnames=labels.keys(), registry=reg)
-    PROM_ERRORS = Counter('co2sensor_ops_errors', 'Number of parsing/checksum errors in received data', labelnames=labels.keys(), registry=reg)
-    PROM_NUM = Gauge('co2sensor_num_values', 'Number of different values received from the sensor', labelnames=labels.keys(), registry=reg)
-    PROM_TEMP = Gauge('co2sensor_temperature_celsius', 'Temperature in Celsius', labelnames=labels.keys(), registry=reg)
-    PROM_CO2 = Gauge('co2sensor_co2_ppm', 'CO2 in ppm', labelnames=labels.keys(), registry=reg)
-    PROM_RH = Gauge('co2sensor_relative_humidity_percent', 'Relative Humidity in percent', labelnames=labels.keys(), registry=reg)
+    PROM_PARSED = Counter('co2sensor_received_packets', 'Number of datapoints received', labelnames=labels.keys(), registry=reg).labels(**labels)
+    PROM_ERRORS = Counter('co2sensor_packet_checksum_errors', 'Number of parsing/checksum errors in received data', labelnames=labels.keys(), registry=reg).labels(**labels)
+    PROM_NUM = Gauge('co2sensor_values_total', 'Number of different values received from the sensor', labelnames=labels.keys(), registry=reg).labels(**labels)
+    PROM_TEMP = Gauge('co2sensor_temperature_celsius', 'Temperature in Celsius', labelnames=labels.keys(), registry=reg).labels(**labels)
+    PROM_CO2 = Gauge('co2sensor_co2_ppm', 'CO2 in ppm', labelnames=labels.keys(), registry=reg).labels(**labels)
+    PROM_RH = Gauge('co2sensor_relative_humidity_percent', 'Relative Humidity in percent', labelnames=labels.keys(), registry=reg).labels(**labels)
 
     start_http_server(port=args.port, addr=args.addr, registry=reg)
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     values = {}
 
     while True:
-        PROM_NUM.labels(**labels).set(len(values))
+        PROM_NUM.set(len(values))
         data = fp.read(8)
         if checksum_valid(data):
             decrypted = data
@@ -89,9 +89,9 @@ if __name__ == "__main__":
             decrypted = decrypt(key, data)
         if not checksum_valid(data):
             print(hd(data), " => ", hd(decrypted),  "Checksum error", file=sys.stderr)
-            PROM_ERRORS.labels(**labels).inc()
+            PROM_ERRORS.inc()
         else:
-            PROM_PARSED.labels(**labels).inc()
+            PROM_PARSED.inc()
             op = decrypted[0]
             val = decrypted[1] << 8 | decrypted[2]
 
@@ -102,18 +102,18 @@ if __name__ == "__main__":
             ## From http://co2meters.com/Documentation/AppNotes/AN146-RAD-0401-serial-communication.pdf
             if 0x50 in values:
                 t = values[0x50]
-                PROM_CO2.labels(**labels).set(t)
+                PROM_CO2.set(t)
                 print("CO2: %4i" % t, end=' ')
             if 0x42 in values:
                 t = values[0x42]/16.0-273.15
-                PROM_TEMP.labels(**labels).set(round(t, 2))
+                PROM_TEMP.set(round(t, 2))
                 print("T: %2.2f" % t, end=' ')
             if 0x44 in values:
                 t = values[0x44]/100.0
-                PROM_RH.labels(**labels).set(round(t, 2))
+                PROM_RH.set(round(t, 2))
                 print("RH: %2.2f" % t, end=' ')
             if 0x41 in values:
                 t = values[0x41]/100.0
-                PROM_RH.labels(**labels).set(round(t, 2))
+                PROM_RH.set(round(t, 2))
                 print("RH: %2.2f" % t, end=' ')
             print()
