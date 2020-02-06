@@ -60,17 +60,24 @@ if __name__ == "__main__":
     parser.add_argument('dev', nargs=1, help='CO2 Sensor hidraw device')
     args = parser.parse_args()
 
-    labels = dict([ i.split('=', 1) for i in args.label ])
+    labels = {}
+    try:
+        labels = dict([ i.split('=', 1) for i in args.label ])
+    except: pass
     print(f"Listening on {args.addr}:{args.port}, appending labels: {labels}", file=sys.stderr)
 
     # Create a metric to track time spent and requests made.
     reg = CollectorRegistry()
-    PROM_PARSED = Counter('co2sensor_received_packets', 'Number of datapoints received', labelnames=labels.keys(), registry=reg).labels(**labels)
-    PROM_ERRORS = Counter('co2sensor_packet_checksum_errors', 'Number of parsing/checksum errors in received data', labelnames=labels.keys(), registry=reg).labels(**labels)
-    PROM_NUM = Gauge('co2sensor_values_total', 'Number of different values received from the sensor', labelnames=labels.keys(), registry=reg).labels(**labels)
-    PROM_TEMP = Gauge('co2sensor_temperature_celsius', 'Temperature in Celsius', labelnames=labels.keys(), registry=reg).labels(**labels)
-    PROM_CO2 = Gauge('co2sensor_co2_ppm', 'CO2 in ppm', labelnames=labels.keys(), registry=reg).labels(**labels)
-    PROM_RH = Gauge('co2sensor_relative_humidity_percent', 'Relative Humidity in percent', labelnames=labels.keys(), registry=reg).labels(**labels)
+    def w(p):
+        if len(labels) > 0:
+            return p.labels(**labels)
+        return p
+    PROM_PARSED = w(Counter('co2sensor_received_packets', 'Number of datapoints received', labelnames=labels.keys(), registry=reg))
+    PROM_ERRORS = w(Counter('co2sensor_packet_checksum_errors', 'Number of parsing/checksum errors in received data', labelnames=labels.keys(), registry=reg))
+    PROM_NUM = w(Gauge('co2sensor_values_total', 'Number of different values received from the sensor', labelnames=labels.keys(), registry=reg))
+    PROM_TEMP = w(Gauge('co2sensor_temperature_celsius', 'Temperature in Celsius', labelnames=labels.keys(), registry=reg))
+    PROM_CO2 = w(Gauge('co2sensor_co2_ppm', 'CO2 in ppm', labelnames=labels.keys(), registry=reg))
+    PROM_RH = w(Gauge('co2sensor_relative_humidity_percent', 'Relative Humidity in percent', labelnames=labels.keys(), registry=reg))
 
     start_http_server(port=args.port, addr=args.addr, registry=reg)
 
