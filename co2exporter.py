@@ -7,7 +7,8 @@ import time
 import argparse
 from prometheus_client import start_http_server, CollectorRegistry, Counter, Gauge
 
-PROM_PORT=8000
+# port allocated at https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+PROM_PORT=9672
 
 # decrypt data {{{
 def decrypt(key,  data):
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     key = [0xc4, 0xc6, 0xc0, 0x92, 0x40, 0x23, 0xdc, 0x96]
 
     parser = argparse.ArgumentParser(description='co2sensor prometheus exporter')
-    parser.add_argument('--port', dest='port', type=int, help='Listening Port')
+    parser.add_argument('--port', dest='port', type=int, default=PROM_PORT, help='Listening Port')
     parser.add_argument('--addr', dest='addr', type=str, default='', help='Listening address')
     parser.add_argument('--label', dest='label', type=str, action='append', help='Labels included in metrics, name=value')
     parser.add_argument('dev', nargs=1, help='CO2 Sensor hidraw device')
