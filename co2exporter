@@ -65,6 +65,8 @@ if __name__ == "__main__":
         labels = dict([ i.split('=', 1) for i in args.label ])
     except: pass
     print(f"Listening on {args.addr}:{args.port}, appending labels: {labels}", file=sys.stderr)
+    # python <3.9 (eg. 3.8 on ubuntu 20.04) does not have line buffered output on stderr
+    sys.stderr.flush()
 
     # metrics
     reg = CollectorRegistry()
@@ -100,6 +102,7 @@ if __name__ == "__main__":
         if not checksum_valid(data):
             PROM_ERRORS.inc()
             print(hd(data), " => ", hd(decrypted),  "Checksum error", file=sys.stderr)
+            sys.stderr.flush()
         else:
             PROM_PARSED.inc()
             op = decrypted[0]
