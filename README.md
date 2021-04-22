@@ -82,9 +82,24 @@ co2sensor_relative_humidity_percent{place="cellar",room="workshop"} 19.22
 
 # Install & usage
 
+Setup device permission stuff
+
+```
+install -o root -g root -m 0644 90-co2exporter.rules /etc/udev/rules.d/
+udevadm control --reload-rules && udevadm trigger
+```
+
+Install `co2exporter` service and run it per default
+
+```
+install -o root -g root -m 0755 co2exporter /opt
+install -o root -g root -m 0644 co2exporter.service /etc/systemd/system
+systemctl daemon-reload
+systemctl start co2exporter
+systemctl enable co2exporter
+```
+
 TODO
 
 
-- run it through systemd
 - pin possible multiple CO2 meters through udev and usb port location they are plugged in to different devices
-- run multiple exporters with different labels

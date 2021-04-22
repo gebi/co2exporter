@@ -1,0 +1,46 @@
+[Unit]
+Description=co2exporter
+Documentation=https://github.com/gebi/co2exporter
+
+[Service]
+ExecStart=/opt/co2exporter /dev/hidraw0 --addr localhost --label location=basement
+DynamicUser=yes
+# used to access hidraw co2 monitor devices
+SupplementaryGroups=plugdev
+DeviceAllow=char-hidraw rw
+Restart=always
+RestartSec=3
+StandardOutput=null
+StandardError=journal
+
+# generic security
+CapabilityBoundingSet=
+UMask=0777
+RemoveIPC=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+# not possible, we need eg. /dev/hidraw0
+#PrivateDevices=yes
+DevicePolicy=closed
+ProtectSystem=strict
+PrivateUsers=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectClock=yes
+ProtectKernelLogs=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged
+SystemCallFilter=~@resources
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+MemoryDenyWriteExecute=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target
