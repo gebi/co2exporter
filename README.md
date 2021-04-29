@@ -101,9 +101,10 @@ systemctl enable co2exporter
 
 scrape through prometheus like normal
 
-# Install integration with grafana-agent
+# Integration example with grafana-agent
 
 Example integration with grafana-agent as "IoT" device
+Nice benefit of using grafana-agent is, that as long as there is enough RAM for WAL, data will be buffered on connection loss to server.
 
 Install grafana agent (example with the version i used) and install sane config
 ```
