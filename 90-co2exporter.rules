@@ -1,4 +1,5 @@
 # udev rules for co2exporter
 #   https://github.com/gebi/co2exporter
 #   Author: Michael Gebetsrroither <michael@mgeb.org>
-KERNEL=="hidraw*", SUBSYSTEM=="usb", ATTRS{idVendor}=="04d9", ATTRS{idProduct}=="a052", GROUP="plugdev", MODE="0660"
+KERNEL=="hidraw*", ATTRS{idVendor}=="04d9", ATTRS{idProduct}=="a052", GROUP="plugdev", MODE="0660"
+SUBSYSTEM=="usb",  ATTRS{idVendor}=="04d9", ATTRS{idProduct}=="a052", GROUP="plugdev", MODE="0660"
