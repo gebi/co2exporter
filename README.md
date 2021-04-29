@@ -99,7 +99,52 @@ systemctl start co2exporter
 systemctl enable co2exporter
 ```
 
-TODO
+scrape through prometheus like normal
 
+# Install integration with grafana-agent
+
+Example integration with grafana-agent as "IoT" device
+
+Install grafana agent (example with the version i used) and install sane config
+```
+wget https://github.com/grafana/agent/releases/download/0.14.0-rc.3/grafana-agent-0.14.0-rc.3-1.arm64.deb
+dpkg -i grafana-agent-0.14.0-rc.3-1.arm64.deb
+install -o root -g grafana-agent -m 0640 grafana-agent.yaml /etc/
+mkdir -p /etc/systemd/system/grafana-agent.service.d/
+install -o root -g root -m 0644 -T grafana-agent_systemd_override.conf /etc/systemd/system/grafana-agent.service.d/override.conf
+```
+
+Add auth settings to `/etc/default/grafana-agent`
+```
+PROM_REMOTE_WRITE_URL="https://prometheus-blocks-prod-us-central1.grafana.net/api/prom/push"
+PROM_REMOTE_WRITE_USER="YOUR_USER"
+PROM_REMOTE_WRITE_PW="YOUR_TOKEN"
+```
+
+Add co2exporter as proper target to intergrated prometheus from `grafana-agent`
+```
+mkdir -p /etc/prometheus/targets/co2exporter/
+cat >/etc/prometheus/targets/co2exporter/manual__`hostname`.yml <<EOT
+# use proper discovery mechanism of prometheus to add targets, even via file
+# manual entry of co2exporter to separate targets from daemon config, and we don't want to restart :)
+- {labels: {instance: '`hostname`:9672'}, targets: ['127.0.0.1:9672']}
+EOT
+```
+
+Restart and check if everything works
+```
+systemctl daemon-reload
+systemctl restart grafana-agent
+```
+
+Look at the data grafana-agent has discovered and sends
+```
+grafana-agentctl wal-stats /run/grafana-agent/*
+grafana-agentctl target-stats /run/grafana-agent/* -j co2exporter -i `hostname`:9672
+# or
+grafana-agentctl target-stats /run/grafana-agent/* -j integrations/node_exporter -i `hostname`:9090
+```
+
+# TODO
 
 - pin possible multiple CO2 meters through udev and usb port location they are plugged in to different devices

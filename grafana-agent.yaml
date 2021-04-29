@@ -1,0 +1,45 @@
+# Co2monitor Grafana Agent
+# For a full configuration reference, see: https://github.com/grafana/agent/blob/main/docs/configuration-reference.md.
+server:
+  http_listen_address: '127.0.0.1'
+  http_listen_port: 9090
+  grpc_listen_address: 127.0.0.1
+
+prometheus:
+  global:
+    scrape_interval: 10s
+    remote_write:
+      - url: ${PROM_REMOTE_WRITE_URL}
+        basic_auth:
+          username: ${PROM_REMOTE_WRITE_USER}
+          password: ${PROM_REMOTE_WRITE_PW}
+  # do not destroy our sd-card on purpose, WAL is not persistent between reboots
+  wal_directory: '/run/grafana-agent'
+  configs:
+    - name: co2exporter
+      host_filter: false
+      scrape_configs:
+        - job_name: co2exporter
+          file_sd_configs:
+            - files:
+              - '/etc/prometheus/targets/co2exporter/*.yml'
+
+integrations:
+  agent:
+    enabled: true
+  prometheus_remote_write:
+    - url: ${PROM_REMOTE_WRITE_URL}
+      basic_auth:
+        username: ${PROM_REMOTE_WRITE_USER}
+        password: ${PROM_REMOTE_WRITE_PW}
+  node_exporter:
+    enabled: true
+    include_exporter_metrics: true
+    disable_collectors:
+      - "mdadm"
+    enable_collectors:
+      - "systemd"
+    # we only really want NRestarts metrics of co2exporter service
+    systemd_unit_whitelist: "co2exporter.+"
+    systemd_enable_restarts_metrics: true
+    systemd_enable_start_time_metrics: true
